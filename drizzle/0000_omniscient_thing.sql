@@ -1,0 +1,89 @@
+CREATE TABLE `penulis` (
+	`id` integer PRIMARY KEY NOT NULL,
+	`nama` text NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE `buku_penulis` (
+	`buku_id` integer,
+	`penulis_id` integer,
+	PRIMARY KEY(`buku_id`, `penulis_id`),
+	FOREIGN KEY (`buku_id`) REFERENCES `buku`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`penulis_id`) REFERENCES `penulis`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE TABLE `buku_kategori` (
+	`buku_id` integer,
+	`kategori_id` integer,
+	PRIMARY KEY(`buku_id`, `kategori_id`),
+	FOREIGN KEY (`buku_id`) REFERENCES `buku`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`kategori_id`) REFERENCES `kategori`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE TABLE `buku` (
+	`id` integer NOT NULL,
+	`revisi` integer NOT NULL,
+	`judul` text NOT NULL,
+	`edisi` text,
+	`status` text DEFAULT 'draft' NOT NULL,
+	`dibuatPada` integer NOT NULL,
+	`dibuatOleh` text,
+	`diubahPada` integer NOT NULL,
+	`diubahOleh` text,
+	`penerbit_id` integer,
+	PRIMARY KEY(`id`, `revisi`),
+	FOREIGN KEY (`dibuatOleh`) REFERENCES `pengguna`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`diubahOleh`) REFERENCES `pengguna`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`penerbit_id`) REFERENCES `penerbit`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE TABLE `kategori` (
+	`id` integer PRIMARY KEY NOT NULL,
+	`nama` text NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE `halaman` (
+	`id` integer PRIMARY KEY NOT NULL,
+	`buku_id` integer,
+	`pageNumber` integer NOT NULL,
+	`tulisan` text NOT NULL,
+	`terjemah` text,
+	`komentar` text,
+	`tangkapan` text,
+	`status` text DEFAULT 'draft' NOT NULL,
+	FOREIGN KEY (`buku_id`) REFERENCES `buku`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE TABLE `pengguna` (
+	`id` text PRIMARY KEY NOT NULL,
+	`username` text NOT NULL,
+	`password_hash` text NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE `hak` (
+	`id` text PRIMARY KEY NOT NULL,
+	`jabatan_id` text,
+	`table_name` text NOT NULL,
+	`can_create` integer DEFAULT false NOT NULL,
+	`can_read` integer DEFAULT false NOT NULL,
+	`can_update` integer DEFAULT false NOT NULL,
+	`can_delete` integer DEFAULT false NOT NULL,
+	FOREIGN KEY (`jabatan_id`) REFERENCES `jabatan`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE TABLE `penerbit` (
+	`id` integer PRIMARY KEY NOT NULL,
+	`nama` text NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE `jabatan` (
+	`id` text PRIMARY KEY NOT NULL,
+	`nama` text NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE `pengguna_jabatan` (
+	`pengguna_id` text,
+	`jabatan_id` text,
+	PRIMARY KEY(`pengguna_id`, `jabatan_id`),
+	FOREIGN KEY (`pengguna_id`) REFERENCES `pengguna`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`jabatan_id`) REFERENCES `jabatan`(`id`) ON UPDATE no action ON DELETE no action
+);
