@@ -10,9 +10,11 @@
 	} from 'carbon-components-svelte';
 	import { Add, TrashCan, Edit } from 'carbon-icons-svelte';
 	import { enhance } from '$app/forms';
+	import { pageTitle } from "$lib/stores/titleStore";
 	import type { publishers } from '$lib/server/db/schema';
 
 	export let data;
+	pageTitle.set('Manage Authors');
 	let open = false;
 	let currentPublisher: (typeof publishers.$inferSelect) | null = null;
 	let publisherForm: HTMLFormElement; // Declare a variable to bind to the form

@@ -8,6 +8,5 @@ export const load: LayoutServerLoad = async (event) => {
 	}
 	return {
 		session,
-		title: 'Back Office',
 	};
 };
