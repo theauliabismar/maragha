@@ -5,7 +5,6 @@
     HeaderAction,
     HeaderPanelLinks,
     HeaderPanelLink,
-    HeaderNav,
     HeaderGlobalAction,
     Content,
   } from 'carbon-components-svelte';
