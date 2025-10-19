@@ -16,19 +16,17 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
   session: {
     strategy: 'jwt'
   },
-  // --- ADD THIS BLOCK ---
-  // This tells Auth.js to use your custom login page
-  // for sign-in and for displaying errors.
   pages: {
     signIn: '/login'
   },
   callbacks: {
     async redirect({ url, baseUrl }) {
+      // If the user is redirected to a callback URL on the same origin, use it
       if (url.startsWith(baseUrl)) return url;
-      return baseUrl + '/admin/manage/authors';
+      // Otherwise redirect to admin manage authors page
+      return `${baseUrl}/admin/manage/authors`;
     }
   },
-  // ----------------------
   providers: [
     Credentials({
       credentials: {
@@ -72,5 +70,6 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
       }
     })
   ],
-  secret: process.env.AUTH_SECRET ?? 'changeme-please-set-ENV-AUTH_SECRET'
+  secret: process.env.AUTH_SECRET ?? 'changeme-please-set-ENV-AUTH_SECRET',
+  trustHost: true
 });
