@@ -27,3 +27,6 @@ vite.config.ts.timestamp-*
 
 # Logs
 *.log
+
+# Vite cache
+.vite/

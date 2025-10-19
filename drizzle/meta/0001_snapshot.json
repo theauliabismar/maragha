@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "ab8a5061-bf10-46ff-bf41-aa86280f11ba",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "c512375e-1579-4608-8508-868efd2a88df",
+  "prevId": "ab8a5061-bf10-46ff-bf41-aa86280f11ba",
   "tables": {
     "account": {
       "name": "account",
@@ -751,6 +751,13 @@
         },
         "image": {
           "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "password": {
+          "name": "password",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
