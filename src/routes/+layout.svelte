@@ -1,8 +1,5 @@
-<script lang="ts">
-	import { navigating } from '$app/stores';
+<script>
+	import 'carbon-components-svelte/css/white.css';
 </script>
 
-<main>
-	<h1>Public Portal</h1>
-	<slot />
-</main>
+<slot />
