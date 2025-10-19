@@ -7,6 +7,7 @@ export const load: LayoutServerLoad = async (event) => {
 		throw redirect(303, '/login');
 	}
 	return {
-		session
+		session,
+		title: 'Back Office',
 	};
 };

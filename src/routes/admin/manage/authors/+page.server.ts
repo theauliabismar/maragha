@@ -3,9 +3,11 @@ import { authors } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 
 export const load = async () => {
+	console.log('--- RUNNING LOAD FUNCTION for /admin/manage/authors ---');
 	const allAuthors = await db.select().from(authors);
 	return {
-		authors: allAuthors
+		authors: allAuthors,
+		title: 'Manage Authors'
 	};
 };
 

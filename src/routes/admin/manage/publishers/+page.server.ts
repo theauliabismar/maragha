@@ -5,7 +5,8 @@ import { eq } from 'drizzle-orm';
 export const load = async () => {
 	const allPublishers = await db.select().from(publishers);
 	return {
-		publishers: allPublishers
+		publishers: allPublishers,
+		title: 'Manage Publishers'
 	};
 };
 

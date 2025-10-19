@@ -5,7 +5,8 @@ import { eq } from 'drizzle-orm';
 export const load = async () => {
 	const allCategories = await db.select().from(categories);
 	return {
-		categories: allCategories
+		categories: allCategories,
+		title: 'Manage Categories'
 	};
 };
 
