@@ -2,14 +2,18 @@ import { db } from '$lib/server/db';
 import { categories } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 
-export const load = async () => {
+export const load = async (event) => {
+	const session = await event.locals.auth();
+	const user = session?.user as { permissions?: Record<string, { canCreate: boolean, canRead: boolean, canUpdate: boolean, canDelete: boolean }> };
+	const permissions = user?.permissions?.categories ?? { canCreate: false, canRead: false, canUpdate: false, canDelete: false };
 	const allCategories = await db.select().from(categories);
 	return {
 		categories: allCategories.map((cat) => ({
 			id: cat.name,
 			name: cat.name
 		})),
-		title: 'Manage Categories'
+		title: 'Manage Categories',
+		permissions
 	};
 };
 

@@ -17,7 +17,7 @@
 	export let data;
 	pageTitle.set('Manage Books');
 	let open = false;
-	let currentBook: (typeof books.$inferSelect) | null = null;
+	let currentBook: (typeof data.books[0]) | null = null;
 	let bookForm: HTMLFormElement;
 	const headers: any[] = [
 		{ key: 'title', value: 'Title' },
@@ -36,7 +36,7 @@
 
 	$: isFormValid = title && authorIds.length > 0 && categoryNames.length > 0;
 
-	function handleEdit(row: typeof books.$inferSelect) {
+	function handleEdit(row: typeof data.books[0]) {
 		currentBook = row;
 		const book = currentBook;
 		title = book.title || '';
@@ -53,13 +53,13 @@
 		}
 		open = true;
 	}
-  function shouldFilterItem(item, value) {
+  function shouldFilterItem(item: { text: string }, value: string) {
     if (!value) return true;
     return item.text.toLowerCase().includes(value.toLowerCase());
   }	
 </script>
 
-<DataTable {headers} rows={data.books} let:row>
+<DataTable {headers} rows={data.books}>
 	<Toolbar>
 		<ToolbarContent>
 			<ToolbarSearch />
@@ -73,7 +73,8 @@
 					publisherSelectedId = undefined;
 					status = 'draft';
 					open = true;
-				}}>Add new</Button
+				}}
+				disabled={!data.permissions.canCreate}>Add new</Button
 			>
 		</ToolbarContent>
 	</Toolbar>
@@ -85,10 +86,11 @@
 				on:click={() => {
 					handleEdit(row);
 				}}
+				disabled={!data.permissions.canUpdate}
 			/>
 			<form method="POST" action="?/delete" use:enhance>
 				<input type="hidden" name="id" value={row.id} />
-				<Button icon={TrashCan} kind="ghost" type="submit" />
+				<Button icon={TrashCan} kind="ghost" type="submit" disabled={!data.permissions.canDelete} />
 			</form>
 		{:else if cell.key === 'title'}
 			<a href="/admin/manage/books/{row.id}">{cell.value}</a>

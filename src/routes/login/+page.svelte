@@ -42,9 +42,6 @@
         callbackUrl: '/admin/manage/authors'
       });
 
-      if (!result?.ok) {
-        isLoading = false;
-      }
     } catch (error) {
       console.error('Sign in error:', error);
       isLoading = false;

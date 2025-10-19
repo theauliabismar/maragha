@@ -37,6 +37,10 @@
         <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/authors">Authors</HeaderPanelLink>
         <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/categories">Categories</HeaderPanelLink>
         <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/publishers">Publishers</HeaderPanelLink>
+        <HeaderPanelDivider />
+        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/users">Users</HeaderPanelLink>
+        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/roles">Roles</HeaderPanelLink>
+        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/permissions">Permissions</HeaderPanelLink>
       </HeaderPanelLinks>
     </HeaderAction>
   </HeaderUtilities>
