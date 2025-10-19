@@ -14,10 +14,10 @@
 	import type { categories } from '$lib/server/db/schema';
 
 	export let data;
-	pageTitle.set('Manage Authors');
+	pageTitle.set('Manage Categories');
 	let open = false;
 	let currentCategory: (typeof categories.$inferSelect) | null = null;
-	let categoryForm: HTMLFormElement; // Declare a variable to bind to the form
+	let categoryForm: HTMLFormElement;
 
 	const headers: any[] = [
 		{ key: 'name', value: 'Name' },
@@ -49,7 +49,7 @@
 				}}
 			/>
 			<form method="POST" action="?/delete" use:enhance>
-				<input type="hidden" name="id" value={row.id} />
+				<input type="hidden" name="id" value={row.name} />
 				<Button icon={TrashCan} kind="ghost" type="submit" />
 			</form>
 		{:else}
@@ -64,15 +64,14 @@
 	primaryButtonText={currentCategory ? 'Save' : 'Add'}
 	secondaryButtonText="Cancel"
 	on:submit={() => {
-		// Programmatically submit the form using the bound element
 		if (categoryForm) {
 			categoryForm.requestSubmit();
 		}
-		open = false; // Close the modal after submission
+		open = false;
 	}}
 >
 	<form bind:this={categoryForm} method="POST" action={currentCategory ? '?/update' : '?/create'} use:enhance>
-		<input type="hidden" name="id" value={currentCategory?.id} />
+		<input type="hidden" name="id" value={currentCategory?.name} />
 		<TextInput labelText="Name" name="name" value={currentCategory?.name} />
 	</form>
 </Modal>

@@ -15,7 +15,7 @@ CREATE TABLE `account` (
 );
 --> statement-breakpoint
 CREATE TABLE `penulis` (
-	`id` integer PRIMARY KEY NOT NULL,
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`nama` text NOT NULL
 );
 --> statement-breakpoint
@@ -29,10 +29,10 @@ CREATE TABLE `buku_penulis` (
 --> statement-breakpoint
 CREATE TABLE `buku_kategori` (
 	`buku_id` integer,
-	`kategori_id` integer,
+	`kategori_id` text,
 	PRIMARY KEY(`buku_id`, `kategori_id`),
 	FOREIGN KEY (`buku_id`) REFERENCES `buku`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`kategori_id`) REFERENCES `kategori`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`kategori_id`) REFERENCES `kategori`(`nama`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `buku` (
@@ -53,8 +53,7 @@ CREATE TABLE `buku` (
 );
 --> statement-breakpoint
 CREATE TABLE `kategori` (
-	`id` integer PRIMARY KEY NOT NULL,
-	`nama` text NOT NULL
+	`nama` text PRIMARY KEY NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `halaman` (
@@ -81,7 +80,7 @@ CREATE TABLE `hak` (
 );
 --> statement-breakpoint
 CREATE TABLE `penerbit` (
-	`id` integer PRIMARY KEY NOT NULL,
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`nama` text NOT NULL
 );
 --> statement-breakpoint
@@ -110,7 +109,8 @@ CREATE TABLE `user` (
 	`name` text,
 	`email` text NOT NULL,
 	`emailVerified` integer,
-	`image` text
+	`image` text,
+	`password` text
 );
 --> statement-breakpoint
 CREATE TABLE `verificationToken` (

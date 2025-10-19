@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "ab8a5061-bf10-46ff-bf41-aa86280f11ba",
+  "id": "7c17993d-b07b-40d9-925e-08aecb5e4dad",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -121,7 +121,7 @@
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": true
         },
         "nama": {
           "name": "nama",
@@ -208,7 +208,7 @@
         },
         "kategori_id": {
           "name": "kategori_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -229,15 +229,15 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "buku_kategori_kategori_id_kategori_id_fk": {
-          "name": "buku_kategori_kategori_id_kategori_id_fk",
+        "buku_kategori_kategori_id_kategori_nama_fk": {
+          "name": "buku_kategori_kategori_id_kategori_nama_fk",
           "tableFrom": "buku_kategori",
           "tableTo": "kategori",
           "columnsFrom": [
             "kategori_id"
           ],
           "columnsTo": [
-            "id"
+            "nama"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -387,17 +387,10 @@
     "kategori": {
       "name": "kategori",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
         "nama": {
           "name": "nama",
           "type": "text",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true,
           "autoincrement": false
         }
@@ -574,7 +567,7 @@
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": true
         },
         "nama": {
           "name": "nama",
@@ -751,6 +744,13 @@
         },
         "image": {
           "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "password": {
+          "name": "password",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

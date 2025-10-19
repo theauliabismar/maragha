@@ -7,6 +7,7 @@
     HeaderPanelLink,
     HeaderGlobalAction,
     Content,
+    HeaderPanelDivider,
   } from 'carbon-components-svelte';
   import { Logout, Menu } from 'carbon-icons-svelte';
   import { expoIn } from "svelte/easing";
@@ -30,6 +31,9 @@
   <HeaderUtilities>
     <HeaderAction bind:isOpen transition={transitions[selected].value}>
       <HeaderPanelLinks>
+        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/books">Books</HeaderPanelLink>
+        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/pages">Pages</HeaderPanelLink>
+        <HeaderPanelDivider />
         <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/authors">Authors</HeaderPanelLink>
         <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/categories">Categories</HeaderPanelLink>
         <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/publishers">Publishers</HeaderPanelLink>

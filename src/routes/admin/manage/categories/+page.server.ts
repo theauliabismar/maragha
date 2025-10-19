@@ -5,7 +5,10 @@ import { eq } from 'drizzle-orm';
 export const load = async () => {
 	const allCategories = await db.select().from(categories);
 	return {
-		categories: allCategories,
+		categories: allCategories.map((cat) => ({
+			id: cat.name,
+			name: cat.name
+		})),
 		title: 'Manage Categories'
 	};
 };
@@ -31,10 +34,10 @@ export const actions = {
 	},
 	update: async ({ request }) => {
 		const data = await request.formData();
-		const id = data.get('id');
-		const name = data.get('name');
+		const oldName = data.get('id');
+		const newName = data.get('name');
 
-		if (!id || !name) {
+		if (!oldName || !newName) {
 			return {
 				success: false
 			};
@@ -42,8 +45,8 @@ export const actions = {
 
 		await db
 			.update(categories)
-			.set({ name: name as string })
-			.where(eq(categories.id, Number(id)));
+			.set({ name: newName as string })
+			.where(eq(categories.name, oldName as string));
 
 		return {
 			success: true
@@ -51,15 +54,15 @@ export const actions = {
 	},
 	delete: async ({ request }) => {
 		const data = await request.formData();
-		const id = data.get('id');
+		const name = data.get('id');
 
-		if (!id) {
+		if (!name) {
 			return {
 				success: false
 			};
 		}
 
-		await db.delete(categories).where(eq(categories.id, Number(id)));
+		await db.delete(categories).where(eq(categories.name, name as string));
 
 		return {
 			success: true

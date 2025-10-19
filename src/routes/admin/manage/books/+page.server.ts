@@ -22,7 +22,7 @@ export const load: PageServerLoad = async () => {
 			const authorLink = allBookAuthors.find((ba) => ba.bookId === book.id);
 			const author = allAuthors.find((a) => a.id === authorLink?.authorId);
 			const categoryLink = allBookCategories.find((bc) => bc.bookId === book.id);
-			const category = allCategories.find((c) => c.id === categoryLink?.categoryId);
+			const category = allCategories.find((c) => c.name === categoryLink?.categoryId);
 			return {
 				...book,
 				author: author?.name,
@@ -43,28 +43,49 @@ export const actions: Actions = {
 		const title = data.get('title') as string;
 		const edition = data.get('edition') as string;
 		const status = data.get('status') as 'draft' | 'terbit' | 'batal';
-		const authorId = Number(data.get('author'));
-		const categoryId = Number(data.get('category'));
-		const publisherId = Number(data.get('publisher'));
+		const authorIdsString = data.get('authors') as string;
+		const authorIds = authorIdsString ? JSON.parse(authorIdsString) : [];
+		const categoryNamesString = data.get('categories') as string;
+		const categoryNames = categoryNamesString ? JSON.parse(categoryNamesString) : [];
+		const publisherId = data.get('publisher') ? Number(data.get('publisher')) : null;
 
-		// For simplicity, we're not handling createdBy and updatedBy yet
-		const newBook = await db
-			.insert(books)
-			.values({
-				title,
-				edition,
-				status,
-				publisherId,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				revision: 1, // Default revision to 1
-			})
-			.returning({ insertedId: books.id });
+		if (!title) {
+			return {
+				success: false,
+				error: 'Title is required'
+			};
+		}
 
-		const bookId = newBook[0].insertedId;
+		// Get the next book ID
+		const lastBook = await db
+			.select({ maxId: books.id })
+			.from(books)
+			.orderBy((t) => ({ id: t.id }))
+			.limit(1);
+		
+		const nextId = (lastBook[0]?.maxId || 0) + 1;
 
-		await db.insert(bookAuthors).values({ bookId, authorId });
-		await db.insert(bookCategories).values({ bookId, categoryId });
+		// Insert book with generated ID
+		await db.insert(books).values({
+			id: nextId,
+			title,
+			edition,
+			status,
+			publisherId: publisherId as number | null,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+			revision: 1,
+		});
+
+		// Insert all selected authors
+		for (const authorId of authorIds) {
+			await db.insert(bookAuthors).values({ bookId: nextId, authorId });
+		}
+		
+		// Insert all selected categories
+		for (const categoryName of categoryNames) {
+			await db.insert(bookCategories).values({ bookId: nextId, categoryId: categoryName });
+		}
 
 		return { success: true };
 	},
@@ -74,9 +95,11 @@ export const actions: Actions = {
 		const title = data.get('title') as string;
 		const edition = data.get('edition') as string;
 		const status = data.get('status') as 'draft' | 'terbit' | 'batal';
-		const authorId = Number(data.get('author'));
-		const categoryId = Number(data.get('category'));
-		const publisherId = Number(data.get('publisher'));
+		const authorIdsString = data.get('authors') as string;
+		const authorIds = authorIdsString ? JSON.parse(authorIdsString) : [];
+		const categoryNamesString = data.get('categories') as string;
+		const categoryNames = categoryNamesString ? JSON.parse(categoryNamesString) : [];
+		const publisherId = data.get('publisher') ? Number(data.get('publisher')) : null;
 
 		await db
 			.update(books)
@@ -84,15 +107,23 @@ export const actions: Actions = {
 				title,
 				edition,
 				status,
-				publisherId,
+				publisherId: publisherId as number | null,
 				updatedAt: new Date()
 			})
 			.where(eq(books.id, id));
 
 		await db.delete(bookAuthors).where(eq(bookAuthors.bookId, id));
 		await db.delete(bookCategories).where(eq(bookCategories.bookId, id));
-		await db.insert(bookAuthors).values({ bookId: id, authorId });
-		await db.insert(bookCategories).values({ bookId: id, categoryId });
+		
+		// Insert all selected authors
+		for (const authorId of authorIds) {
+			await db.insert(bookAuthors).values({ bookId: id, authorId });
+		}
+		
+		// Insert all selected categories
+		for (const categoryName of categoryNames) {
+			await db.insert(bookCategories).values({ bookId: id, categoryId: categoryName });
+		}
 
 		return { success: true };
 	},

@@ -81,7 +81,7 @@ export const permissions = sqliteTable('hak', {
 });
 
 export const publishers = sqliteTable('penerbit', {
-	id: integer('id').primaryKey(),
+	id: integer('id').primaryKey({ autoIncrement: true }),
 	name: text('nama').notNull()
 });
 
@@ -118,7 +118,7 @@ export const pages = sqliteTable('halaman', {
 });
 
 export const authors = sqliteTable('penulis', {
-	id: integer('id').primaryKey(),
+	id: integer('id').primaryKey({ autoIncrement: true }),
 	name: text('nama').notNull()
 });
 
@@ -134,15 +134,14 @@ export const bookAuthors = sqliteTable(
 );
 
 export const categories = sqliteTable('kategori', {
-	id: integer('id').primaryKey(),
-	name: text('nama').notNull()
+	name: text('nama').primaryKey()
 });
 
 export const bookCategories = sqliteTable(
 	'buku_kategori',
 	{
 		bookId: integer('buku_id').references(() => books.id),
-		categoryId: integer('kategori_id').references(() => categories.id)
+		categoryId: text('kategori_id').references(() => categories.name)
 	},
 	(t) => ({
 		pk: primaryKey({ columns: [t.bookId, t.categoryId] })
