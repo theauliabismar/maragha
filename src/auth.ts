@@ -22,6 +22,12 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
   pages: {
     signIn: '/login'
   },
+  callbacks: {
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith(baseUrl)) return url;
+      return baseUrl + '/admin/manage/authors';
+    }
+  },
   // ----------------------
   providers: [
     Credentials({

@@ -6,19 +6,17 @@
     TextInput,
     InlineNotification
   } from 'carbon-components-svelte';
+  import { goto } from '$app/navigation';
+  import { signIn } from '@auth/sveltekit/client';
 
   export let data;
 
-  // --- Start of new code ---
-  // Create variables to hold the input values
   let email = '';
   let password = '';
+  let isLoading = false;
 
-  // This reactive variable will be true if either field is empty
-  $: isDisabled = !email || !password;
-  // --- End of new code ---
+  $: isDisabled = !email || !password || isLoading;
 
-  // A map of Auth.js error codes to user-friendly messages
   const errorMessages = {
     CredentialsSignin: 'Invalid email or password. Please try again.',
     EmailSignin: 'Failed to send the sign-in email. Please try again later.',
@@ -30,6 +28,23 @@
   };
 
   $: errorMessage = errorMessages[data.error as keyof typeof errorMessages] || errorMessages.Default;
+
+  async function handleSubmit() {
+    isLoading = true;
+    const result = await signIn('credentials', {
+      email,
+      password,
+      redirect: false
+    });
+
+    if (result?.ok) {
+      // Redirect to admin on success
+      await goto('/admin');
+    } else {
+      isLoading = false;
+      // Error will be shown via data.error
+    }
+  }
 </script>
 
 {#if data.error}
@@ -41,12 +56,25 @@
   />
 {/if}
 
-<Form method="POST" action="/auth/callback/credentials">
+<Form on:submit={(e) => {handleSubmit(); e.preventDefault();}}>
   <FormGroup>
-    <TextInput labelText="Email" name="email" bind:value={email} />
+    <TextInput 
+      labelText="Email" 
+      name="email" 
+      bind:value={email}
+      disabled={isLoading}
+    />
   </FormGroup>
   <FormGroup>
-    <TextInput type="password" labelText="Password" name="password" bind:value={password} />
+    <TextInput 
+      type="password" 
+      labelText="Password" 
+      name="password" 
+      bind:value={password}
+      disabled={isLoading}
+    />
   </FormGroup>
-  <Button type="submit" disabled={isDisabled}>Log in</Button>
+  <Button type="submit" disabled={isDisabled}>
+    {isLoading ? 'Logging in...' : 'Log in'}
+  </Button>
 </Form>
