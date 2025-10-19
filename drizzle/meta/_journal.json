@@ -8,6 +8,20 @@
       "when": 1760888654188,
       "tag": "0000_common_gamora",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1760908341696,
+      "tag": "0001_left_lila_cheney",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1760911352315,
+      "tag": "0002_amazing_sasquatch",
+      "breakpoints": true
     }
   ]
 }

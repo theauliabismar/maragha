@@ -2,11 +2,15 @@ import { db } from '$lib/server/db';
 import { publishers } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 
-export const load = async () => {
+export const load = async (event) => {
+	const session = await event.locals.auth();
+	const user = session?.user as { permissions?: Record<string, { canCreate: boolean, canRead: boolean, canUpdate: boolean, canDelete: boolean }> };
+	const permissions = user?.permissions?.publishers ?? { canCreate: false, canRead: false, canUpdate: false, canDelete: false };
 	const allPublishers = await db.select().from(publishers);
 	return {
 		publishers: allPublishers,
-		title: 'Manage Publishers'
+		title: 'Manage Publishers',
+		permissions
 	};
 };
 

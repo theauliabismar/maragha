@@ -7,10 +7,13 @@ import {
 	categories,
 	publishers
 } from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, max } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async (event) => {
+	const session = await event.locals.auth();
+	const user = session?.user as { permissions?: Record<string, { canCreate: boolean, canRead: boolean, canUpdate: boolean, canDelete: boolean }> };
+	const permissions = user?.permissions?.books ?? { canCreate: false, canRead: false, canUpdate: false, canDelete: false };
 	const allBooks = await db.select().from(books);
 	const allAuthors = await db.select().from(authors);
 	const allCategories = await db.select().from(categories);
@@ -33,7 +36,12 @@ export const load: PageServerLoad = async () => {
 		categories: allCategories,
 		publishers: allPublishers,
 		bookAuthors: allBookAuthors,
-		bookCategories: allBookCategories
+		bookCategories: allBookCategories,
+		permissions: {
+			canCreate: permissions.canCreate ?? false,
+			canUpdate: permissions.canUpdate ?? false,
+			canDelete: permissions.canDelete ?? false
+		}
 	};
 };
 
@@ -57,13 +65,9 @@ export const actions: Actions = {
 		}
 
 		// Get the next book ID
-		const lastBook = await db
-			.select({ maxId: books.id })
-			.from(books)
-			.orderBy((t) => ({ id: t.id }))
-			.limit(1);
-		
-		const nextId = (lastBook[0]?.maxId || 0) + 1;
+		const result = await db.select({ value: max(books.id) }).from(books);
+		const maxId = result[0].value ?? 0;
+		const nextId = maxId + 1;
 
 		// Insert book with generated ID
 		await db.insert(books).values({

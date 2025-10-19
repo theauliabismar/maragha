@@ -34,7 +34,8 @@
 				on:click={() => {
 					currentPublisher = null;
 					open = true;
-				}}>Add new</Button
+				}}
+				disabled={!data.permissions.canCreate}>Add new</Button
 			>
 		</ToolbarContent>
 	</Toolbar>
@@ -47,10 +48,11 @@
 					currentPublisher = row;
 					open = true;
 				}}
+				disabled={!data.permissions.canUpdate}
 			/>
 			<form method="POST" action="?/delete" use:enhance>
 				<input type="hidden" name="id" value={row.id} />
-				<Button icon={TrashCan} kind="ghost" type="submit" />
+				<Button icon={TrashCan} kind="ghost" type="submit" disabled={!data.permissions.canDelete} />
 			</form>
 		{:else}
 			{cell.value}

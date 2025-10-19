@@ -2,12 +2,16 @@ import { db } from '$lib/server/db';
 import { authors } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 
-export const load = async () => {
+export const load = async (event) => {
+	const session = await event.locals.auth();
+	const user = session?.user as { permissions?: Record<string, { canCreate: boolean, canRead: boolean, canUpdate: boolean, canDelete: boolean }> };
+	const permissions = user?.permissions?.authors ?? { canCreate: false, canRead: false, canUpdate: false, canDelete: false };
 	console.log('--- RUNNING LOAD FUNCTION for /admin/manage/authors ---');
 	const allAuthors = await db.select().from(authors);
 	return {
 		authors: allAuthors,
-		title: 'Manage Authors'
+		title: 'Manage Authors',
+		permissions
 	};
 };
 

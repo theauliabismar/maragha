@@ -147,3 +147,15 @@ export const bookCategories = sqliteTable(
 		pk: primaryKey({ columns: [t.bookId, t.categoryId] })
 	})
 );
+
+export const userBookshelf = sqliteTable(
+	'buku_pengguna',
+	{
+		userId: text('pengguna_id').references(() => users.id),
+		bookId: integer('buku_id').references(() => books.id),
+		progress: integer('kemajuan').notNull().default(0)
+	},
+	(t) => ({
+		pk: primaryKey({ columns: [t.userId, t.bookId] })
+	})
+);
