@@ -2,12 +2,20 @@ import { SvelteKitAuth } from '@auth/sveltekit';
 import { DrizzleAdapter } from '@auth/drizzle-adapter';
 import { db } from '$lib/server/db';
 import Credentials from '@auth/core/providers/credentials';
-import { users } from '$lib/server/db/schema';
+import { users, accounts, sessions, verificationTokens } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 
 export const { handle, signIn, signOut } = SvelteKitAuth({
-	adapter: DrizzleAdapter(db),
+	adapter: DrizzleAdapter(db, {
+		usersTable: users,
+		accountsTable: accounts,
+		sessionsTable: sessions,
+		verificationTokensTable: verificationTokens
+	}),
+	session: {
+		strategy: 'jwt'
+	},
 	providers: [
 		Credentials({
 			credentials: {
@@ -40,5 +48,6 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 				}
 			}
 		})
-	]
+	],
+	secret: process.env.AUTH_SECRET ?? 'changeme-please-set-ENV-AUTH_SECRET'
 });

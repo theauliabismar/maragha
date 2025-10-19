@@ -15,6 +15,7 @@
 	export let data;
 	let open = false;
 	let currentCategory: (typeof categories.$inferSelect) | null = null;
+	let categoryForm: HTMLFormElement; // Declare a variable to bind to the form
 
 	const headers: any[] = [
 		{ key: 'name', value: 'Name' },
@@ -61,10 +62,14 @@
 	primaryButtonText={currentCategory ? 'Save' : 'Add'}
 	secondaryButtonText="Cancel"
 	on:submit={() => {
-		open = false;
+		// Programmatically submit the form using the bound element
+		if (categoryForm) {
+			categoryForm.requestSubmit();
+		}
+		open = false; // Close the modal after submission
 	}}
 >
-	<form method="POST" action={currentCategory ? '?/update' : '?/create'} use:enhance>
+	<form bind:this={categoryForm} method="POST" action={currentCategory ? '?/update' : '?/create'} use:enhance>
 		<input type="hidden" name="id" value={currentCategory?.id} />
 		<TextInput labelText="Name" name="name" value={currentCategory?.name} />
 	</form>

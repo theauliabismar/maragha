@@ -15,6 +15,7 @@
 	export let data;
 	let open = false;
 	let currentPublisher: (typeof publishers.$inferSelect) | null = null;
+	let publisherForm: HTMLFormElement; // Declare a variable to bind to the form
 
 	const headers: any[] = [
 		{ key: 'name', value: 'Name' },
@@ -61,10 +62,14 @@
 	primaryButtonText={currentPublisher ? 'Save' : 'Add'}
 	secondaryButtonText="Cancel"
 	on:submit={() => {
-		open = false;
+		// Programmatically submit the form using the bound element
+		if (publisherForm) {
+			publisherForm.requestSubmit();
+		}
+		open = false; // Close the modal after submission
 	}}
 >
-	<form method="POST" action={currentPublisher ? '?/update' : '?/create'} use:enhance>
+	<form bind:this={publisherForm} method="POST" action={currentPublisher ? '?/update' : '?/create'} use:enhance>
 		<input type="hidden" name="id" value={currentPublisher?.id} />
 		<TextInput labelText="Name" name="name" value={currentPublisher?.name} />
 	</form>

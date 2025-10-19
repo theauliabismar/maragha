@@ -6,19 +6,18 @@
 		TextInput,
 		Toolbar,
 		ToolbarContent,
-		ToolbarSearch
-	} from 'carbon-components-svelte';
-	import { Add, TrashCan, Edit } from 'carbon-icons-svelte';
-	import { enhance } from '$app/forms';
-	import type { authors } from '$lib/server/db/schema';
-
+		ToolbarSearch,
+	} from "carbon-components-svelte";
+	import { Add, TrashCan, Edit } from "carbon-icons-svelte";
+	import { enhance } from "$app/forms";
+	import type { authors } from "$lib/server/db/schema";
 	export let data;
 	let open = false;
-	let currentAuthor: (typeof authors.$inferSelect) | null = null;
-
+	let currentAuthor: typeof authors.$inferSelect | null = null;
+	let authorForm: HTMLFormElement; // Declare a variable to bind to the form
 	const headers: any[] = [
-		{ key: 'name', value: 'Name' },
-		{ key: 'actions', value: 'Actions', sortable: false }
+		{ key: "name", value: "Name" },
+		{ key: "actions", value: "Actions", sortable: false },
 	];
 </script>
 
@@ -36,7 +35,7 @@
 		</ToolbarContent>
 	</Toolbar>
 	<svelte:fragment slot="cell" let:row let:cell>
-		{#if cell.key === 'actions'}
+		{#if cell.key === "actions"}
 			<Button
 				icon={Edit}
 				kind="ghost"
@@ -54,17 +53,25 @@
 		{/if}
 	</svelte:fragment>
 </DataTable>
-
 <Modal
 	bind:open
-	modalHeading={currentAuthor ? 'Edit author' : 'Add new author'}
-	primaryButtonText={currentAuthor ? 'Save' : 'Add'}
+	modalHeading={currentAuthor ? "Edit author" : "Add new author"}
+	primaryButtonText={currentAuthor ? "Save" : "Add"}
 	secondaryButtonText="Cancel"
 	on:submit={() => {
-		open = false;
+		// Programmatically submit the form using the bound element
+		if (authorForm) {
+			authorForm.requestSubmit();
+		}
+		open = false; // Close the modal after submission
 	}}
 >
-	<form method="POST" action={currentAuthor ? '?/update' : '?/create'} use:enhance>
+	<form
+		bind:this={authorForm}
+		method="POST"
+		action={currentAuthor ? "?/update" : "?/create"}
+		use:enhance
+	>
 		<input type="hidden" name="id" value={currentAuthor?.id} />
 		<TextInput labelText="Name" name="name" value={currentAuthor?.name} />
 	</form>
