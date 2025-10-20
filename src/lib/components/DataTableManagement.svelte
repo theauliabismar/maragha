@@ -16,6 +16,7 @@
   } from "carbon-components-svelte";
   import { Add, TrashCan, Edit } from "carbon-icons-svelte";
   import { enhance } from "$app/forms";
+  import { tick } from "svelte";
 
   export let title: string;
   export let headers: any[] = [];
@@ -38,6 +39,8 @@
   let currentData: any = null;
   let editForm: HTMLFormElement;
   let deleteForm: HTMLFormElement;
+  let isSubmitting = false;
+  let formData: Record<string, any> = {};
 
   $: filteredRows = rows.filter((row) => {
     if (!searchTerm) return true;
@@ -56,6 +59,7 @@
   function openCreateModal() {
     currentData = null;
     isEditing = false;
+    formData = {};
     isModalOpen = true;
   }
 
@@ -63,6 +67,11 @@
     if (selectedRowIds.length !== 1) return;
     const selected = rows.find((r) => r.id === selectedRowIds[0]);
     currentData = { ...selected };
+    // Populate formData with current values
+    formData = {};
+    fields.forEach(field => {
+      formData[field.name] = selected[field.name] ?? '';
+    });
     isEditing = true;
     isModalOpen = true;
   }
@@ -71,13 +80,15 @@
     isModalOpen = false;
     currentData = null;
     selectedRowIds = [];
+    isSubmitting = false;
+    formData = {};
   }
 
-  function handleSubmit() {
+  function handleModalSubmit() {
+    if (isSubmitting) return;
     if (editForm) {
       editForm.requestSubmit();
     }
-    closeModal();
   }
 
   function handleDelete() {
@@ -94,6 +105,20 @@
     }
   }
 
+  async function setInitialFocus() {
+    await tick();
+    if(editForm) {
+      const firstField = editForm.querySelector(
+        'input:not([type="hidden"]):not([disabled]):not([readonly]), ' +
+          'textarea:not([disabled]):not([readonly]), ' +
+          'select:not([disabled]):not([readonly])'
+      ) as HTMLElement | null;
+      if (firstField) {
+        firstField.focus();
+      }
+    }
+  }
+
   function getFieldValue(fieldName: string) {
     return currentData?.[fieldName] ?? "";
   }
@@ -103,17 +128,11 @@
   }
 </script>
 
-<DataTable radio bind:selectedRowIds {headers} rows={filteredRows} on:click>
+<DataTable radio bind:selectedRowIds {headers} rows={filteredRows} on:click:row={(e) => (selectedRowIds = [e.detail.id])}>
   <Toolbar>
     <ToolbarContent>
       <ToolbarSearch bind:value={searchTerm} placeholder="Search..." />
       <Button on:click={openCreateModal} icon={Add}>Create</Button>
-      <!-- <ToolbarMenu>
-        <ToolbarMenuItem on:click={openCreateModal}>
-          <Add size={16} />
-          Create
-        </ToolbarMenuItem> 
-      </ToolbarMenu> -->
     </ToolbarContent>
     {#if selectedRowIds.length > 0}
       <ToolbarBatchActions on:cancel={() => (selectedRowIds = [])}>
@@ -142,18 +161,32 @@
 </DataTable>
 
 <Modal
-  open={isModalOpen}
+  bind:open={isModalOpen}
   modalHeading={isEditing ? `Edit ${title}` : `Create ${title}`}
   primaryButtonText={isEditing ? "Save" : "Create"}
   secondaryButtonText="Cancel"
+  primaryButtonDisabled={isSubmitting}
   on:click:button--secondary={closeModal}
-  on:submit={handleSubmit}
+  on:submit={handleModalSubmit}
+  on:open={setInitialFocus}
 >
   <form
     bind:this={editForm}
     method="POST"
     action={isEditing ? "?/update" : "?/create"}
-    use:enhance
+    on:submit|preventDefault
+    use:enhance={()=>{
+      if (isSubmitting) return;
+      isSubmitting = true;
+      return async ({result, update}) => {
+        if (result.type === 'success' || result.status === 200) {
+          await update();
+          closeModal();
+        } else {
+          isSubmitting = false;
+        }
+      }
+    }}
   >
     {#if isEditing}
       <input type="hidden" name="id" value={currentData?.id} />
@@ -165,8 +198,9 @@
           <TextInput
             labelText={field.label}
             name={field.name}
-            value={getFieldValue(field.name)}
+            bind:value={formData[field.name]}
             required={field.required}
+            disabled={isSubmitting}
           />
         </div>
       {:else if getFieldType(field) === "textarea"}
@@ -174,8 +208,9 @@
           <TextArea
             labelText={field.label}
             name={field.name}
-            value={getFieldValue(field.name)}
+            bind:value={formData[field.name]}
             required={field.required}
+            disabled={isSubmitting}
           />
         </div>
       {:else if getFieldType(field) === "select"}
@@ -183,8 +218,9 @@
           <Select
             labelText={field.label}
             name={field.name}
-            selected={getFieldValue(field.name)}
+            bind:selected={formData[field.name]}
             required={field.required}
+            disabled={isSubmitting}
           >
             {#if field.options}
               {#each field.options as option}
@@ -197,10 +233,3 @@
     {/each}
   </form>
 </Modal>
-
-<!-- <style>
-	:global(.bx--toolbar-batch-actions) {
-		display: flex;
-		gap: 0.5rem;
-	}
-</style> -->
