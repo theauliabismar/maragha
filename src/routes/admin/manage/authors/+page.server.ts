@@ -6,7 +6,6 @@ export const load = async (event) => {
 	const session = await event.locals.auth();
 	const user = session?.user as { permissions?: Record<string, { canCreate: boolean, canRead: boolean, canUpdate: boolean, canDelete: boolean }> };
 	const permissions = user?.permissions?.authors ?? { canCreate: false, canRead: false, canUpdate: false, canDelete: false };
-	console.log('--- RUNNING LOAD FUNCTION for /admin/manage/authors ---');
 	const allAuthors = await db.select().from(authors);
 	return {
 		authors: allAuthors,
