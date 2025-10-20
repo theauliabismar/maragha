@@ -76,7 +76,7 @@ CREATE TABLE `hak` (
 	`can_read` integer DEFAULT false NOT NULL,
 	`can_update` integer DEFAULT false NOT NULL,
 	`can_delete` integer DEFAULT false NOT NULL,
-	FOREIGN KEY (`jabatan_id`) REFERENCES `jabatan`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`jabatan_id`) REFERENCES `jabatan`(`nama`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `penerbit` (
@@ -85,8 +85,7 @@ CREATE TABLE `penerbit` (
 );
 --> statement-breakpoint
 CREATE TABLE `jabatan` (
-	`id` text PRIMARY KEY NOT NULL,
-	`nama` text NOT NULL
+	`nama` text PRIMARY KEY NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `session` (
@@ -96,12 +95,21 @@ CREATE TABLE `session` (
 	FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE TABLE `buku_pengguna` (
+	`pengguna_id` text,
+	`buku_id` integer,
+	`kemajuan` integer DEFAULT 0 NOT NULL,
+	PRIMARY KEY(`pengguna_id`, `buku_id`),
+	FOREIGN KEY (`pengguna_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`buku_id`) REFERENCES `buku`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
 CREATE TABLE `pengguna_jabatan` (
 	`pengguna_id` text,
 	`jabatan_id` text,
 	PRIMARY KEY(`pengguna_id`, `jabatan_id`),
 	FOREIGN KEY (`pengguna_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`jabatan_id`) REFERENCES `jabatan`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`jabatan_id`) REFERENCES `jabatan`(`nama`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `user` (

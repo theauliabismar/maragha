@@ -1,1 +1,0 @@
-ALTER TABLE `buku_pengguna` ADD `kemajuan` integer DEFAULT 0 NOT NULL;

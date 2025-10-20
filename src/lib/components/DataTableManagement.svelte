@@ -14,7 +14,7 @@
     Select,
     SelectItem,
   } from "carbon-components-svelte";
-  import { Add, TrashCan, Edit, Data_2 } from "carbon-icons-svelte";
+  import { Add, TrashCan, Edit } from "carbon-icons-svelte";
   import { enhance } from "$app/forms";
 
   export let title: string;
@@ -37,6 +37,7 @@
   let searchTerm = "";
   let currentData: any = null;
   let editForm: HTMLFormElement;
+  let deleteForm: HTMLFormElement;
 
   $: filteredRows = rows.filter((row) => {
     if (!searchTerm) return true;
@@ -46,14 +47,9 @@
   }).map(row=>{
     const filtered: any = {};
     headers.forEach(header => {
-      console.log(1, header)
-      if(!hiddenColumns.includes(header.key)) {
-        console.log(2, header)
-        filtered[header.key] = row[header.key];
-      }
+      filtered[header.key] = row[header.key];
     });
     filtered.id = row.id;
-    console.log(filtered)
     return filtered;
   });
 
@@ -84,6 +80,20 @@
     closeModal();
   }
 
+  function handleDelete() {
+    if(deleteForm) {
+      const selectedRow = rows.find((r) => r.id === selectedRowIds[0]);
+      if(selectedRow) {
+        const hiddenInput = deleteForm.querySelector('input[name="id"]') as HTMLInputElement;
+        if(hiddenInput) {
+          hiddenInput.value = selectedRow.id;
+        }
+      }
+      deleteForm.requestSubmit();
+      selectedRowIds = [];
+    }
+  }
+
   function getFieldValue(fieldName: string) {
     return currentData?.[fieldName] ?? "";
   }
@@ -107,13 +117,13 @@
     </ToolbarContent>
     {#if selectedRowIds.length > 0}
       <ToolbarBatchActions on:cancel={() => (selectedRowIds = [])}>
-        <form method="POST" action="?/delete" use:enhance>
-          <input type="hidden" name="id" value={selectedRowIds[0]} />
+        <form bind:this={deleteForm} method="POST" action="?/delete" use:enhance>
+          <input type="hidden" name="id" value={rows[selectedRowIds[0]]?.id} />
           <Button
             icon={TrashCan}
             kind="danger"
-            type="submit"
-            on:click={() => (selectedRowIds = [])}
+            type="button"
+            on:click={handleDelete}
           >
             Delete
           </Button>

@@ -55,15 +55,14 @@ export const verificationTokens = sqliteTable(
 );
 
 export const roles = sqliteTable('jabatan', {
-	id: text('id').primaryKey(),
-	name: text('nama').notNull()
+	name: text('nama').primaryKey().notNull()
 });
 
 export const userRoles = sqliteTable(
 	'pengguna_jabatan',
 	{
 		userId: text('pengguna_id').references(() => users.id),
-		roleId: text('jabatan_id').references(() => roles.id)
+		roleId: text('jabatan_id').references(() => roles.name)
 	},
 	(t) => ({
 		pk: primaryKey({ columns: [t.userId, t.roleId] })
@@ -72,7 +71,7 @@ export const userRoles = sqliteTable(
 
 export const permissions = sqliteTable('hak', {
 	id: text('id').primaryKey(),
-	roleId: text('jabatan_id').references(() => roles.id),
+	roleId: text('jabatan_id').references(() => roles.name),
 	tableName: text('table_name').notNull(),
 	canCreate: integer('can_create', { mode: 'boolean' }).notNull().default(false),
 	canRead: integer('can_read', { mode: 'boolean' }).notNull().default(false),

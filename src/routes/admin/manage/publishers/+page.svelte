@@ -1,80 +1,34 @@
 <script lang="ts">
-	import {
-		Button,
-		DataTable,
-		Modal,
-		TextInput,
-		Toolbar,
-		ToolbarContent,
-		ToolbarSearch
-	} from 'carbon-components-svelte';
-	import { Add, TrashCan, Edit } from 'carbon-icons-svelte';
-	import { enhance } from '$app/forms';
-	import { pageTitle } from "$lib/stores/titleStore";
-	import type { publishers } from '$lib/server/db/schema';
+	import DataTableManagement from '$lib/components/DataTableManagement.svelte';
+	import { pageTitle } from '$lib/stores/titleStore';
 
 	export let data;
-	pageTitle.set('Manage Authors');
-	let open = false;
-	let currentPublisher: (typeof publishers.$inferSelect) | null = null;
-	let publisherForm: HTMLFormElement; // Declare a variable to bind to the form
 
-	const headers: any[] = [
-		{ key: 'name', value: 'Name' },
-		{ key: 'actions', value: 'Actions', sortable: false }
+	pageTitle.set('Atur Penerbit');
+
+	const headers = [
+		{ key: 'name', value: 'Name' }
+	];
+
+	const fields: Array<{
+		name: string;
+		label: string;
+		type: 'text' | 'textarea' | 'select';
+		required?: boolean;
+	}> = [
+		{
+			name: 'name',
+			label: 'Penerbit',
+			type: 'text',
+			required: true
+		}
 	];
 </script>
 
-<DataTable {headers} rows={data.publishers}>
-	<Toolbar>
-		<ToolbarContent>
-			<ToolbarSearch />
-			<Button
-				icon={Add}
-				on:click={() => {
-					currentPublisher = null;
-					open = true;
-				}}
-				disabled={!data.permissions.canCreate}>Add new</Button
-			>
-		</ToolbarContent>
-	</Toolbar>
-	<svelte:fragment slot="cell" let:row let:cell>
-		{#if cell.key === 'actions'}
-			<Button
-				icon={Edit}
-				kind="ghost"
-				on:click={() => {
-					currentPublisher = row;
-					open = true;
-				}}
-				disabled={!data.permissions.canUpdate}
-			/>
-			<form method="POST" action="?/delete" use:enhance>
-				<input type="hidden" name="id" value={row.id} />
-				<Button icon={TrashCan} kind="ghost" type="submit" disabled={!data.permissions.canDelete} />
-			</form>
-		{:else}
-			{cell.value}
-		{/if}
-	</svelte:fragment>
-</DataTable>
-
-<Modal
-	bind:open
-	modalHeading={currentPublisher ? 'Edit publisher' : 'Add new publisher'}
-	primaryButtonText={currentPublisher ? 'Save' : 'Add'}
-	secondaryButtonText="Cancel"
-	on:submit={() => {
-		// Programmatically submit the form using the bound element
-		if (publisherForm) {
-			publisherForm.requestSubmit();
-		}
-		open = false; // Close the modal after submission
-	}}
->
-	<form bind:this={publisherForm} method="POST" action={currentPublisher ? '?/update' : '?/create'} use:enhance>
-		<input type="hidden" name="id" value={currentPublisher?.id} />
-		<TextInput labelText="Name" name="name" value={currentPublisher?.name} />
-	</form>
-</Modal>
+<DataTableManagement
+	title="Penulis"
+	{headers}
+	rows={data.publishers}
+	{fields}
+	hiddenColumns={['id']}
+/>

@@ -9,7 +9,7 @@ export const load = async (event) => {
 	const allCategories = await db.select().from(categories);
 	return {
 		categories: allCategories.map((cat) => ({
-			id: cat.name,
+			id: cat.name, // Use name as the id since it's the primary key
 			name: cat.name
 		})),
 		title: 'Manage Categories',
@@ -58,15 +58,15 @@ export const actions = {
 	},
 	delete: async ({ request }) => {
 		const data = await request.formData();
-		const name = data.get('id');
+		const id = data.get('id');
 
-		if (!name) {
+		if (!id) {
 			return {
 				success: false
 			};
 		}
 
-		await db.delete(categories).where(eq(categories.name, name as string));
+		await db.delete(categories).where(eq(categories.name, id as string));
 
 		return {
 			success: true

@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "7c17993d-b07b-40d9-925e-08aecb5e4dad",
+  "id": "1d728482-e4b9-4c19-b2f5-cd4f98cacee6",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -541,15 +541,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "hak_jabatan_id_jabatan_id_fk": {
-          "name": "hak_jabatan_id_jabatan_id_fk",
+        "hak_jabatan_id_jabatan_nama_fk": {
+          "name": "hak_jabatan_id_jabatan_nama_fk",
           "tableFrom": "hak",
           "tableTo": "jabatan",
           "columnsFrom": [
             "jabatan_id"
           ],
           "columnsTo": [
-            "id"
+            "nama"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -586,17 +586,10 @@
     "jabatan": {
       "name": "jabatan",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
         "nama": {
           "name": "nama",
           "type": "text",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true,
           "autoincrement": false
         }
@@ -652,6 +645,73 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "buku_pengguna": {
+      "name": "buku_pengguna",
+      "columns": {
+        "pengguna_id": {
+          "name": "pengguna_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "buku_id": {
+          "name": "buku_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "kemajuan": {
+          "name": "kemajuan",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "buku_pengguna_pengguna_id_user_id_fk": {
+          "name": "buku_pengguna_pengguna_id_user_id_fk",
+          "tableFrom": "buku_pengguna",
+          "tableTo": "user",
+          "columnsFrom": [
+            "pengguna_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "buku_pengguna_buku_id_buku_id_fk": {
+          "name": "buku_pengguna_buku_id_buku_id_fk",
+          "tableFrom": "buku_pengguna",
+          "tableTo": "buku",
+          "columnsFrom": [
+            "buku_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "buku_pengguna_pengguna_id_buku_id_pk": {
+          "columns": [
+            "pengguna_id",
+            "buku_id"
+          ],
+          "name": "buku_pengguna_pengguna_id_buku_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "pengguna_jabatan": {
       "name": "pengguna_jabatan",
       "columns": {
@@ -685,15 +745,15 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "pengguna_jabatan_jabatan_id_jabatan_id_fk": {
-          "name": "pengguna_jabatan_jabatan_id_jabatan_id_fk",
+        "pengguna_jabatan_jabatan_id_jabatan_nama_fk": {
+          "name": "pengguna_jabatan_jabatan_id_jabatan_nama_fk",
           "tableFrom": "pengguna_jabatan",
           "tableTo": "jabatan",
           "columnsFrom": [
             "jabatan_id"
           ],
           "columnsTo": [
-            "id"
+            "nama"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
