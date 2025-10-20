@@ -5,14 +5,14 @@
     Toolbar,
     ToolbarContent,
     ToolbarSearch,
-    ToolbarMenu,
-    ToolbarMenuItem,
     ToolbarBatchActions,
     Modal,
     TextInput,
     TextArea,
     Select,
     SelectItem,
+    MultiSelect,
+    ComboBox
   } from "carbon-components-svelte";
   import { Add, TrashCan, Edit } from "carbon-icons-svelte";
   import { enhance } from "$app/forms";
@@ -23,11 +23,16 @@
   export let rows: any[] = [];
   export let fields: FieldConfig[] = [];
   export let hiddenColumns: string[] = [];
+  export let permissions: {
+    canCreate: boolean;
+    canUpdate: boolean;
+    canDelete: boolean;
+  } = { canCreate: true, canUpdate: true, canDelete: true };
 
   interface FieldConfig {
     name: string;
     label: string;
-    type: "text" | "textarea" | "select";
+    type: "text" | "textarea" | "select" | "multiselect" | "combobox";
     options?: { value: any; label: string }[];
     required?: boolean;
   }
@@ -42,24 +47,33 @@
   let isSubmitting = false;
   let formData: Record<string, any> = {};
 
-  $: filteredRows = rows.filter((row) => {
-    if (!searchTerm) return true;
-    return Object.values(row).some((val) =>
-      String(val).toLowerCase().includes(searchTerm.toLowerCase()),
-    );
-  }).map(row=>{
-    const filtered: any = {};
-    headers.forEach(header => {
-      filtered[header.key] = row[header.key];
+  $: filteredRows = rows
+    .filter((row) => {
+      if (!searchTerm) return true;
+      return Object.values(row).some((val) =>
+        String(val).toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    })
+    .map((row) => {
+      const filtered: any = {};
+      headers.forEach((header) => {
+        filtered[header.key] = row[header.key];
+      });
+      filtered.id = row.id;
+      return filtered;
     });
-    filtered.id = row.id;
-    return filtered;
-  });
 
   function openCreateModal() {
     currentData = null;
     isEditing = false;
     formData = {};
+    fields.forEach((field) => {
+      if (field.type === "multiselect") {
+        formData[field.name] = [];
+      } else {
+        formData[field.name] = "";
+      }
+    });
     isModalOpen = true;
   }
 
@@ -67,10 +81,13 @@
     if (selectedRowIds.length !== 1) return;
     const selected = rows.find((r) => r.id === selectedRowIds[0]);
     currentData = { ...selected };
-    // Populate formData with current values
     formData = {};
-    fields.forEach(field => {
-      formData[field.name] = selected[field.name] ?? '';
+    fields.forEach((field) => {
+      if (field.type === "multiselect") {
+        formData[field.name] = selected[field.name] || [];
+      } else {
+        formData[field.name] = selected[field.name] ?? "";
+      }
     });
     isEditing = true;
     isModalOpen = true;
@@ -92,11 +109,13 @@
   }
 
   function handleDelete() {
-    if(deleteForm) {
+    if (deleteForm) {
       const selectedRow = rows.find((r) => r.id === selectedRowIds[0]);
-      if(selectedRow) {
-        const hiddenInput = deleteForm.querySelector('input[name="id"]') as HTMLInputElement;
-        if(hiddenInput) {
+      if (selectedRow) {
+        const hiddenInput = deleteForm.querySelector(
+          'input[name="id"]'
+        ) as HTMLInputElement;
+        if (hiddenInput) {
           hiddenInput.value = selectedRow.id;
         }
       }
@@ -107,7 +126,7 @@
 
   async function setInitialFocus() {
     await tick();
-    if(editForm) {
+    if (editForm) {
       const firstField = editForm.querySelector(
         'input:not([type="hidden"]):not([disabled]):not([readonly]), ' +
           'textarea:not([disabled]):not([readonly]), ' +
@@ -119,20 +138,33 @@
     }
   }
 
-  function getFieldValue(fieldName: string) {
-    return currentData?.[fieldName] ?? "";
-  }
-
   function getFieldType(field: FieldConfig) {
     return field.type;
   }
+
+  function shouldFilterItem(item: { text: string }, value: string) {
+    if (!value) return true;
+    return item.text.toLowerCase().includes(value.toLowerCase());
+  }
 </script>
 
-<DataTable radio bind:selectedRowIds {headers} rows={filteredRows} on:click:row={(e) => (selectedRowIds = [e.detail.id])}>
+<DataTable
+  radio
+  bind:selectedRowIds
+  {headers}
+  rows={filteredRows}
+  on:click:row={(e) => (selectedRowIds = [e.detail.id])}
+>
   <Toolbar>
     <ToolbarContent>
       <ToolbarSearch bind:value={searchTerm} placeholder="Search..." />
-      <Button on:click={openCreateModal} icon={Add}>Create</Button>
+      <Button
+        on:click={openCreateModal}
+        icon={Add}
+        disabled={!permissions.canCreate}
+      >
+        Create
+      </Button>
     </ToolbarContent>
     {#if selectedRowIds.length > 0}
       <ToolbarBatchActions on:cancel={() => (selectedRowIds = [])}>
@@ -143,6 +175,7 @@
             kind="danger"
             type="button"
             on:click={handleDelete}
+            disabled={!permissions.canDelete}
           >
             Delete
           </Button>
@@ -150,7 +183,7 @@
         <Button
           icon={Edit}
           kind="secondary"
-          disabled={selectedRowIds.length !== 1}
+          disabled={selectedRowIds.length !== 1 || !permissions.canUpdate}
           on:click={openEditModal}
         >
           Edit
@@ -175,17 +208,17 @@
     method="POST"
     action={isEditing ? "?/update" : "?/create"}
     on:submit|preventDefault
-    use:enhance={()=>{
+    use:enhance={() => {
       if (isSubmitting) return;
       isSubmitting = true;
-      return async ({result, update}) => {
-        if (result.type === 'success' || result.status === 200) {
+      return async ({ result, update }) => {
+        if (result.type === "success" || result.status === 200) {
           await update();
           closeModal();
         } else {
           isSubmitting = false;
         }
-      }
+      };
     }}
   >
     {#if isEditing}
@@ -228,6 +261,38 @@
               {/each}
             {/if}
           </Select>
+        </div>
+      {:else if getFieldType(field) === "multiselect"}
+        <div style="margin-bottom: 1rem;">
+          <MultiSelect
+            titleText={field.label}
+            label={`Select ${field.label.toLowerCase()}`}
+            filterable
+            items={(field.options || []).map(opt => ({ id: opt.value, text: opt.label }))}
+            bind:selectedIds={formData[field.name]}
+            disabled={isSubmitting}
+          />
+          <input
+            type="hidden"
+            name={field.name}
+            value={JSON.stringify(formData[field.name])}
+          />
+        </div>
+      {:else if getFieldType(field) === "combobox"}
+        <div style="margin-bottom: 1rem;">
+          <ComboBox
+            titleText={field.label}
+            placeholder={`Select ${field.label.toLowerCase()}`}
+            items={(field.options || []).map(opt => ({ id: opt.value, text: opt.label }))}
+            bind:selectedId={formData[field.name]}
+            shouldFilterItem={shouldFilterItem}
+            disabled={isSubmitting}
+          />
+          <input
+            type="hidden"
+            name={field.name}
+            value={formData[field.name] || ''}
+          />
         </div>
       {/if}
     {/each}

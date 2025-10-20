@@ -12,14 +12,28 @@ import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async (event) => {
 	const session = await event.locals.auth();
-	const user = session?.user as { permissions?: Record<string, { canCreate: boolean, canRead: boolean, canUpdate: boolean, canDelete: boolean }> };
-	const permissions = user?.permissions?.books ?? { canCreate: false, canRead: false, canUpdate: false, canDelete: false };
+	const user = session?.user as { 
+		permissions?: Record<string, { 
+			canCreate: boolean; 
+			canRead: boolean; 
+			canUpdate: boolean; 
+			canDelete: boolean;
+		}> 
+	};
+	const permissions = user?.permissions?.books ?? { 
+		canCreate: false, 
+		canRead: false, 
+		canUpdate: false, 
+		canDelete: false 
+	};
+
 	const allBooks = await db.select().from(books);
 	const allAuthors = await db.select().from(authors);
 	const allCategories = await db.select().from(categories);
 	const allPublishers = await db.select().from(publishers);
 	const allBookAuthors = await db.select().from(bookAuthors);
 	const allBookCategories = await db.select().from(bookCategories);
+
 	return {
 		books: allBooks.map((book) => {
 			const authorLink = allBookAuthors.find((ba) => ba.bookId === book.id);
@@ -50,12 +64,18 @@ export const actions: Actions = {
 		const data = await request.formData();
 		const title = data.get('title') as string;
 		const edition = data.get('edition') as string;
-		const status = data.get('status') as 'draft' | 'terbit' | 'batal';
-		const authorIdsString = data.get('authors') as string;
-		const authorIds = authorIdsString ? JSON.parse(authorIdsString) : [];
-		const categoryNamesString = data.get('categories') as string;
-		const categoryNames = categoryNamesString ? JSON.parse(categoryNamesString) : [];
-		const publisherId = data.get('publisher') ? Number(data.get('publisher')) : null;
+		const status = (data.get('status') as 'draft' | 'terbit' | 'batal') || 'draft';
+		
+		// Parse authors and categories from JSON strings
+		const authorsString = data.get('authors') as string;
+		const authorIds = authorsString ? JSON.parse(authorsString) : [];
+		
+		const categoriesString = data.get('categories') as string;
+		const categoryNames = categoriesString ? JSON.parse(categoriesString) : [];
+		
+		// Parse publisher
+		const publisherString = data.get('publisher') as string;
+		const publisherId = publisherString ? Number(publisherString) : null;
 
 		if (!title) {
 			return {
@@ -73,7 +93,7 @@ export const actions: Actions = {
 		await db.insert(books).values({
 			id: nextId,
 			title,
-			edition,
+			edition: edition || '1',
 			status,
 			publisherId: publisherId as number | null,
 			createdAt: new Date(),
@@ -93,29 +113,37 @@ export const actions: Actions = {
 
 		return { success: true };
 	},
+
 	update: async ({ request }) => {
 		const data = await request.formData();
 		const id = Number(data.get('id'));
 		const title = data.get('title') as string;
 		const edition = data.get('edition') as string;
-		const status = data.get('status') as 'draft' | 'terbit' | 'batal';
-		const authorIdsString = data.get('authors') as string;
-		const authorIds = authorIdsString ? JSON.parse(authorIdsString) : [];
-		const categoryNamesString = data.get('categories') as string;
-		const categoryNames = categoryNamesString ? JSON.parse(categoryNamesString) : [];
-		const publisherId = data.get('publisher') ? Number(data.get('publisher')) : null;
+		const status = (data.get('status') as 'draft' | 'terbit' | 'batal') || 'draft';
+		
+		// Parse authors and categories from JSON strings
+		const authorsString = data.get('authors') as string;
+		const authorIds = authorsString ? JSON.parse(authorsString) : [];
+		
+		const categoriesString = data.get('categories') as string;
+		const categoryNames = categoriesString ? JSON.parse(categoriesString) : [];
+		
+		// Parse publisher
+		const publisherString = data.get('publisher') as string;
+		const publisherId = publisherString ? Number(publisherString) : null;
 
 		await db
 			.update(books)
 			.set({
 				title,
-				edition,
+				edition: edition || '1',
 				status,
 				publisherId: publisherId as number | null,
 				updatedAt: new Date()
 			})
 			.where(eq(books.id, id));
 
+		// Delete existing relationships
 		await db.delete(bookAuthors).where(eq(bookAuthors.bookId, id));
 		await db.delete(bookCategories).where(eq(bookCategories.bookId, id));
 		
@@ -131,12 +159,16 @@ export const actions: Actions = {
 
 		return { success: true };
 	},
+
 	delete: async ({ request }) => {
 		const data = await request.formData();
 		const id = Number(data.get('id'));
 
+		// Delete relationships first
 		await db.delete(bookAuthors).where(eq(bookAuthors.bookId, id));
 		await db.delete(bookCategories).where(eq(bookCategories.bookId, id));
+		
+		// Delete the book
 		await db.delete(books).where(eq(books.id, id));
 
 		return { success: true };

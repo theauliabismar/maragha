@@ -31,16 +31,16 @@
   <HeaderUtilities>
     <HeaderAction bind:isOpen transition={transitions[selected].value}>
       <HeaderPanelLinks>
-        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/books">Books</HeaderPanelLink>
-        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/pages">Pages</HeaderPanelLink>
+        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/books">Buku</HeaderPanelLink>
+        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/pages">Halaman</HeaderPanelLink>
         <HeaderPanelDivider />
-        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/authors">Authors</HeaderPanelLink>
-        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/categories">Categories</HeaderPanelLink>
-        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/publishers">Publishers</HeaderPanelLink>
+        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/authors">Penulis</HeaderPanelLink>
+        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/categories">Ketegori</HeaderPanelLink>
+        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/manage/publishers">Penerbit</HeaderPanelLink>
         <HeaderPanelDivider />
-        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/users">Users</HeaderPanelLink>
-        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/roles">Roles</HeaderPanelLink>
-        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/permissions">Permissions</HeaderPanelLink>
+        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/users">Pengguna</HeaderPanelLink>
+        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/roles">Jabatan</HeaderPanelLink>
+        <HeaderPanelLink on:click={() => (isOpen = false)} href="/admin/permissions">Hak</HeaderPanelLink>
       </HeaderPanelLinks>
     </HeaderAction>
   </HeaderUtilities>
